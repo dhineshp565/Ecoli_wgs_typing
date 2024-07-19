@@ -27,7 +27,7 @@ params:
   
   sero_raw <- read.csv(params$sero,header = TRUE,sep = "\t")
   colnames(sero_raw) <- c("SAMPLE","GENE","%COVERAGE","%IDENTITY","SEROTYPE")
-  print(knitr::kable(sero_raw,align='lcccl',caption = "Serotype - \n Predicted based on capsular polysaccharides(cps).For more info please see https://doi.org/10.1186/s12866-016-0782-8"))
+  print(knitr::kable(sero_raw,align='lcccl',caption = "Serotype - \n Predicted using abricate EcOH SRT2 database"))
   cat("\n")
 
   mlst_raw <- read.csv(params$mlst,header = TRUE,sep = "\t")
