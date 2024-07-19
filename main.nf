@@ -130,9 +130,9 @@ process abricate{
 	
 	script:
 	"""
-	abricate --db  ${consensus} 1> ${SampleName}_sero.csv
+	abricate --db ecoh ${consensus} 1> ${SampleName}_sero.csv
 	sed -i 's,_flye.fasta,,g' ${SampleName}_sero.csv
-	abricate --db  ${consensus} 1> ${SampleName}_vf.csv
+	abricate --db ecoli_vf  ${consensus} 1> ${SampleName}_vf.csv
 	sed -i 's,_flye.fasta,,g' ${SampleName}_vf.csv
 	abricate --db card ${consensus} 1> ${SampleName}_AMR.csv
 	sed -i 's,_flye.fasta,,g' ${SampleName}_AMR.csv
@@ -158,7 +158,7 @@ process make_limsfile {
 	
 	script:
 	"""
-	LIMS.sh
+	LIMS_file.sh
 	
 
 	awk 'FNR==1 && NR!=1 { while (/^FILE/) getline; } 1 {print}' ${mlst_results} > MLST_file.csv
@@ -171,6 +171,7 @@ process make_report {
 	publishDir "${params.out_dir}/",mode:"copy"
 	input:
 	path(rmdfile)
+	path(lims)
 	path(serofile)
 	path (mlstfile)
 	path(busco)
@@ -191,10 +192,7 @@ process make_report {
 
 	Rscript -e 'rmarkdown::render(input="rmdfile_copy.Rmd",params=list(sero="serofile.csv",mlst="mlstfile.csv",csv="samples.csv"),output_file="Ecoli_report.html")'
 	
-	# Generate current date and time
-	datetime=\$(date +"%d%b%Y_%H-%M-%S")
-	# Move the report to the output directory
-	mv Ecoli_report.html Ecoli_report_${datetime}.html
+	
 	"""
 
 }
