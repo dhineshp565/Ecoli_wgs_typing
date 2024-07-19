@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 # This script takes the outputs form abricate and merges them into one tabsepearted file for imprting into LIMS casebook
 
 # Extract data from *_sero.csv files
