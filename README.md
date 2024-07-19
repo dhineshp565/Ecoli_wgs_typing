@@ -1,0 +1,1 @@
+# Ecoli_wgs_typing
