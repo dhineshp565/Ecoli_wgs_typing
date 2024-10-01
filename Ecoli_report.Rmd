@@ -26,12 +26,14 @@ params:
 ```{r, results='asis',echo=FALSE}
   
   sero_raw <- read.csv(params$sero,header = TRUE,sep = "\t")
-  colnames(sero_raw) <- c("SAMPLE","GENE","%COVERAGE","%IDENTITY","SEROTYPE")
+  sero_final<- sero_raw_1[,c(1,6,10,11,15)]
+  colnames(sero_final) <- c("SAMPLE","GENE","%COVERAGE","%IDENTITY","SEROTYPE")
   print(knitr::kable(sero_raw,align='lcccl',caption = "Serotype - \n Predicted using abricate EcOH SRT2 database"))
   cat("\n")
 
-  mlst_raw <- read.csv(params$mlst,header = TRUE,sep = "\t")
-  print(knitr::kable(mlst_raw,align= 'lccccccccr',caption = "MLST - \n Predicted using https://pubmlst.org/ and MLST tool (https://github.com/tseemann/mlst)"))
+  mlst_raw <- read.csv(params$mlst,header = FALSE,sep = "\t")
+  colnames(mlst_raw) <- c("SAMPLE","SCHEME","ST""adk","fumC","gyrB","icd","mdh","purA","recA")
+  print(knitr::kable(mlst_raw,align= 'lcccccccccr',caption = "MLST - \n Predicted using https://pubmlst.org/ and MLST tool (https://github.com/tseemann/mlst)"))
   cat("\n")
   
  
