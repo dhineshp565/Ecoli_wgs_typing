@@ -151,6 +151,7 @@ process make_limsfile {
 	path (vf_results)
 	path (amr_results)
 	path (mlst_results)
+	path (software_version)
 	output:
 	path("*_LIMS_file.csv")
 	path("sero_file.csv"),emit:sero
@@ -161,8 +162,10 @@ process make_limsfile {
 	LIMS_file.sh
 	
 	
-	cat ${mlst_results} > MLST_file.csv
-	sed -i 's/FILE/id/g' MLST_file.csv
+	awk 'FNR==1 && NR!=1 { while (/^#F/) getline; } 1 {print}' ${mlst_results} > MLST_file.csv
+	# add header to mlst file
+	sed -i \$'1 i\\\nSAMPLE\tSCHEME\tST\tadk\tfumC\tgyrB\ticd\tmdh\tpurA\trecA' MLST_file.csv
+
 	"""
 }
 
@@ -224,7 +227,7 @@ workflow {
 	
 	
     //make lims file
-    make_limsfile (abricate.out.sero.collect(),abricate.out.vif.collect(),abricate.out.AMR.collect(),mlst.out.collect())
+    make_limsfile (abricate.out.sero.collect(),abricate.out.vif.collect(),abricate.out.AMR.collect(),mlst.out.collect(),versionfile)
 	//report generation
 
 	rmd_file=file("${baseDir}/Ecoli_report.Rmd")
