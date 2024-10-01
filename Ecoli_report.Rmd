@@ -26,10 +26,11 @@ params:
 ```{r, results='asis',echo=FALSE}
   
   sero_raw <- read.csv(params$sero,header = TRUE,sep = "\t")
-  sero_final<- sero_raw_1[,c(1,6,10,11,15)]
+  sero_final<- sero_raw[,c(1,6,10,11,14)]
   colnames(sero_final) <- c("SAMPLE","GENE","%COVERAGE","%IDENTITY","SEROTYPE")
-  print(knitr::kable(sero_raw,align='lcccl',caption = "Serotype - \n Predicted using abricate EcOH SRT2 database"))
+  print(knitr::kable(sero_final,align='lcccl',caption = "Serotype - \n Predicted using abricate EcOH SRT2 database"))
   cat("\n")
+
 
   mlst_raw <- read.csv(params$mlst,header = FALSE,sep = "\t")
   colnames(mlst_raw) <- c("SAMPLE","SCHEME","ST","adk","fumC","gyrB","icd","mdh","purA","recA")
@@ -55,7 +56,7 @@ params:
   
     vf_id <- (paste(i,"_vf.csv",sep=""))
     vf_raw <- read.csv(vf_id,header = TRUE,sep="\t")
-    vf_final <- vf_raw[,c(1,6,10,11,15)]
+    vf_final <- vf_raw[,c(1,6,10,11,14)]
     colnames(vf_final) <- c("SAMPLE","GENE","%COVERAGE","%IDENTITY","VIRULENCE FACTOR")
     print(knitr::kable(vf_final,align= 'lcccl',caption = "Virulence factors - \n Predicted based on https://doi.org/10.1186/s12866-016-0782-8 using abricate tool"))
     cat("\n")

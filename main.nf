@@ -160,8 +160,8 @@ process make_limsfile {
 	"""
 	LIMS_file.sh
 	
-
-	awk 'FNR==1 && NR!=1 { while (/^FILE/) getline; } 1 {print}' ${mlst_results} > MLST_file.csv
+	
+	cat ${mlst_results} > MLST_file.csv
 	sed -i 's/FILE/id/g' MLST_file.csv
 	"""
 }
@@ -224,7 +224,7 @@ workflow {
 	
 	
     //make lims file
-    make_limsfile (abricate.out,mlst.out.collect())
+    make_limsfile (abricate.out.sero.collect(),abricate.out.vif.collect(),abricate.out.AMR.collect(),mlst.out.collect())
 	//report generation
 
 	rmd_file=file("${baseDir}/Ecoli_report.Rmd")
