@@ -32,7 +32,7 @@ params:
   cat("\n")
 
   mlst_raw <- read.csv(params$mlst,header = FALSE,sep = "\t")
-  colnames(mlst_raw) <- c("SAMPLE","SCHEME","ST""adk","fumC","gyrB","icd","mdh","purA","recA")
+  colnames(mlst_raw) <- c("SAMPLE","SCHEME","ST","adk","fumC","gyrB","icd","mdh","purA","recA")
   print(knitr::kable(mlst_raw,align= 'lcccccccccr',caption = "MLST - \n Predicted using https://pubmlst.org/ and MLST tool (https://github.com/tseemann/mlst)"))
   cat("\n")
   
