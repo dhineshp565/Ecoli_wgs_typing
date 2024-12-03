@@ -32,8 +32,13 @@ paste amr_file.csv amr_column.txt > amr_res.csv
 datetime=$(date +"%d%b%Y_%H-%M-%S")
 
 # Extract data from *_res.csv files and save as ${datetime}_LIMS_file.csv
-awk 'FNR==1 && NR!=1 { while (/^#F/) getline; } 1 {print}' *_res.csv > ${datetime}_LIMS_file.csv
+awk 'FNR==1 && NR!=1 { while (/^#F/) getline; } 1 {print}' *_res.csv > LIMS_file.csv
+
+
+
+cat software_version.csv LIMS_file.csv >> ${datetime}_LIMS_file.tsv
 
 # Replace "#FILE" with "ID" in ${datetime}_LIMS_file.csv
-sed -i 's,#FILE,ID,g' ${datetime}_LIMS_file.csv
+sed -i 's,#FILE,ID,g' ${datetime}_LIMS_file.tsv
 
+sed -i 's,_assembly.fasta,,g' ${datetime}_LIMS_file.tsv

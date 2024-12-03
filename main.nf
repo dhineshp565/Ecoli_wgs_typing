@@ -64,6 +64,7 @@ process porechop {
 	"""
 }
 
+
 process dragonflye {
     label "high"
     publishDir "${params.out_dir}/Assembly",mode:"copy"
@@ -71,12 +72,11 @@ process dragonflye {
     tuple val(SampleName),path(SamplePath)
 	val(medaka_model)
     output:
-    val(SampleName),emit:sample
-	tuple val(SampleName),path("${SampleName}_flye.fasta"),emit:assembly
+	tuple val(SampleName),path("${SampleName}_flye.fasta")
 	path("${SampleName}_flye-info.txt"),emit:flyeinfo
     script:
     """
-    dragonflye --reads ${SamplePath} --outdir ${SampleName}_assembly --model ${medaka_model} --gsize 2.4M --nanohq --medaka 1
+    dragonflye --reads ${SamplePath} --outdir ${SampleName}_assembly --gsize 4.5M --nanohq 
     # rename fasta file with samplename
     mv "${SampleName}_assembly"/flye.fasta "${SampleName}"_flye.fasta
     # rename fasta header with samplename
@@ -85,6 +85,31 @@ process dragonflye {
     mv "${SampleName}_assembly"/flye-info.txt "${SampleName}"_flye-info.txt
     sed -i 's/contig/${SampleName}_contig/g' "${SampleName}_flye-info.txt"
     """
+}
+
+
+process medaka {
+	publishDir "${params.out_dir}/medaka",mode:"copy"
+	label "high"
+	input:
+	tuple val(SampleName),path(SamplePath)
+	tuple val(SampleName),path(draft_assembly)
+	path("${SampleName}_flye-info.txt")
+	val (medaka_model)
+	output:
+	tuple val(SampleName),emit:sample
+	tuple val(SampleName),path("${SampleName}_assembly.fasta"),emit:assembly
+	path("${SampleName}_flye-info.txt"),emit:flyeinfo
+	
+	script:
+	"""
+	
+	medaka_consensus -i ${SamplePath} -d ${draft_assembly} -o ${SampleName}_medaka_assembly --bacteria
+		
+	mv ${SampleName}_medaka_assembly/consensus.fasta ${SampleName}_assembly.fasta
+	
+	"""
+
 }
 
 
@@ -131,11 +156,11 @@ process abricate{
 	script:
 	"""
 	abricate --db ecoh ${consensus} 1> ${SampleName}_sero.csv
-	sed -i 's,_flye.fasta,,g' ${SampleName}_sero.csv
+	sed -i 's,_assembly.fasta,,g' ${SampleName}_sero.csv
 	abricate --db ecoli_vf  ${consensus} 1> ${SampleName}_vf.csv
-	sed -i 's,_flye.fasta,,g' ${SampleName}_vf.csv
+	sed -i 's,_assembly.fasta,,g' ${SampleName}_vf.csv
 	abricate --db card ${consensus} 1> ${SampleName}_AMR.csv
-	sed -i 's,_flye.fasta,,g' ${SampleName}_AMR.csv
+	sed -i 's,_assembly.fasta,,g' ${SampleName}_AMR.csv
 	
 	"""
 	
@@ -153,7 +178,7 @@ process make_limsfile {
 	path (mlst_results)
 	path (software_version)
 	output:
-	path("*_LIMS_file.csv")
+	path("*_LIMS_file.tsv")
 	path("sero_file.csv"),emit:sero
 	path("MLST_file.csv"),emit:mlst
 	
@@ -214,16 +239,20 @@ workflow {
     if (params.trim_barcodes){
 		porechop(merge_fastq.out)
 		dragonflye(porechop.out,params.medaka_model) 
+		medaka(porechop.out,dragonflye.out,params.medaka_model)
 	} else {
-        dragonflye(merge_fastq.out,params.medaka_model)           
+        dragonflye(merge_fastq.out,params.medaka_model)  
+		medaka(porechop.out,dragonflye.out,params.medaka_model)         
     }
 	versionfile=file("${baseDir}/software_version.csv")
-	//checking completeness of assembly
-    busco(dragonflye.out.assembly)
-	//mlst
-    mlst (dragonflye.out.assembly)
+
 	
-    abricate (dragonflye.out.assembly)
+	//checking completeness of assembly
+    busco(medaka.out.assembly)
+	//mlst
+    mlst (medaka.out.assembly)
+	
+    abricate (medaka.out.assembly)
 	
 	
     //make lims file
